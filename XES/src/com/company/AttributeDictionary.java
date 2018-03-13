@@ -7,7 +7,7 @@ import java.util.*;
 
 public class AttributeDictionary {
     private String dbname;
-    private HashMap<XAttribute, Integer> attributeDictionary;
+    private HashMap<String, Integer> attributeDictionary;
 
 
     public AttributeDictionary (String logInfo, XLog logFile) {
@@ -20,7 +20,9 @@ public class AttributeDictionary {
                 String conceptName = XConceptExtension.KEY_NAME;
                 if (attributes.containsKey(conceptName))
                 {
-                    XAttribute key = attributes.get(conceptName);
+                    String key = attributes.get(conceptName).toString();
+                    key = key.replaceAll("[^A-Za-z0-9 ]", "");
+                    key = key.replaceAll(" ", "_").toLowerCase();
                     //XAttribute code = attributes.get("Activity code");
                     if (attributeDictionary.containsKey(key)) {
                         Integer frequency = attributeDictionary.get(key);
@@ -38,7 +40,7 @@ public class AttributeDictionary {
         return dbname;
     }
 
-    public HashMap<XAttribute, Integer> getAttributeDictionary() {
+    public HashMap<String, Integer> getAttributeDictionary() {
         return attributeDictionary;
     }
 }

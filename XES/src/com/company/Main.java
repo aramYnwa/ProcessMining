@@ -13,16 +13,20 @@ import org.deckfour.xes.model.*;
 public class Main {
 	
 	public static void main (String args[])  {
-		
+
 		try {
 			XLog log = XLogReader.openLog("hospital_log.xes");
 
 			AttributeDictionary dict = new AttributeDictionary("Hospital", log);
+
+			XesSerializeToArff serialize = new XesSerializeToArff(dict, log);
+			serialize.BinarySerialize();
+
 			//ConstraintConditions formula = ConstraintConditions.build("[A.x>0][A.y==T.y][2,6,d]");
 			
 			//LTLRule rule1 = new LTLRule(DeclareTemplate.Response, formula, "Task1", "Task2");
 			
-			for(XTrace trace:log){
+			/*for(XTrace trace:log){
 				String traceName = XConceptExtension.instance().extractName(trace);
 				System.out.println("TraceName: "+traceName);
 				XAttributeMap caseAttributes = trace.getAttributes();
@@ -76,7 +80,7 @@ public class Main {
 			System.out.println("First Trace in log: "+XConceptExtension.instance().extractName(log.get(0)));
 			
 			
-			
+			*/
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
