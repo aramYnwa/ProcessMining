@@ -1,6 +1,7 @@
 package com.company;
 
 import org.deckfour.xes.extension.std.XConceptExtension;
+import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -15,6 +16,7 @@ public class XesSerializeToArff {
     private String fileName;
     private XLog logFile;
     private Path arffPath;
+    private long averageTime;
     private ArrayList<String> attributes;
 
     public XesSerializeToArff(AttributeDictionary attributeDictionary, XLog xlog) {
@@ -23,11 +25,39 @@ public class XesSerializeToArff {
         logFile = xlog;
         fileName = attributeDictionary.getDbname();
         arffPath = Paths.get(fileName + ".arff");
+        averageTime = CalculateAverageTime(xlog);
+    }
+
+    private Long CalculateAverageTime(XLog xlog) {
+        long accumulator = 0;
+        long temp = 0;
+        for (XTrace trace : xlog) {
+            long seconds = getTraceDuration(trace);
+            accumulator += seconds;
+            temp ++;
+
+        }
+        return accumulator / temp;
+    }
+
+    private long getTraceDuration(XTrace trace) {
+        int length = trace.size();
+        XEvent firstEvent = trace.get(0);
+        Date firstEventTS = XTimeExtension.instance().extractTimestamp(firstEvent);
+
+
+        XEvent lastEvent  = trace.get(length - 1);
+        Date lastEventTS = XTimeExtension.instance().extractTimestamp(lastEvent);
+
+        //Getting difference by days.
+        //FIXME: Make sure that measurement with days is a right approach.
+        long days = (lastEventTS.getTime() - firstEventTS.getTime()) / (1000 * 60 * 60 * 24);
+
+        return days;
     }
 
     //FIXME: Add binary and frequency constants to use in parameters.
     public void BinarySerialize () {
-
         List<String> arrfFile = CreateAttributes();
         CreateData(arrfFile);
         WriteToArff(arrfFile);
