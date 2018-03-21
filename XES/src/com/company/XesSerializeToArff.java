@@ -56,6 +56,19 @@ public class XesSerializeToArff {
         return days;
     }
 
+    /**
+     * Our goal is examine slower traces.
+     * We classify by "1" traces which is slow (lasts longer then average)
+     * We classify by "0" traces which is fast.
+     */
+    private String ClassifyTrace (XTrace trace) {
+        long traceExecutionTime = getTraceDuration(trace);
+        if (traceExecutionTime > averageTime)
+            return "1";
+        else
+            return "0";
+    }
+
     //FIXME: Add binary and frequency constants to use in parameters.
     public void BinarySerialize () {
         List<String> arrfFile = CreateAttributes();
@@ -66,9 +79,11 @@ public class XesSerializeToArff {
     private void CreateData(List<String> arffFile) {
         arffFile.add("@DATA \n");
         for (XTrace trace :logFile) {
+            String label = ", " + ClassifyTrace(trace);
             String instanceString = TraceToString(trace);
             String arffInstance = instanceString.substring(1, instanceString.length() - 1);
-            arffFile.add(arffInstance);
+            arffInstance += label;
+            arffFile.add(arffInstance); 
         }
     }
 
@@ -96,6 +111,11 @@ public class XesSerializeToArff {
             String arrfAttr = "@ATTRIBUTE " + attribute + " NUMERIC";
             file.add(arrfAttr);
         }
+
+        // Add the label column which is binary
+        // but in ARFF format there is no BINARY type.
+        String labelAttribute = "@ATTRIBUTE label NUMERIC";
+        file.add(labelAttribute);
         file.add("\n");
         return file;
     }
@@ -107,5 +127,6 @@ public class XesSerializeToArff {
             System.out.println(e.getMessage());
         }
     }
+
 }
 
