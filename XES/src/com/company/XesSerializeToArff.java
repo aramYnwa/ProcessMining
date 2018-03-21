@@ -19,6 +19,7 @@ public class XesSerializeToArff {
     private Path arffPath;
     private long averageTime;
     private ArrayList<String> attributes;
+    private SerializationType mode;
 
     public XesSerializeToArff(AttributeDictionary attributeDictionary, XLog xlog) {
         dict = attributeDictionary;
@@ -69,7 +70,8 @@ public class XesSerializeToArff {
     }
 
     //FIXME: Add binary and frequency constants to use in parameters.
-    public void binarySerialize() {
+    public void serialize(SerializationType type) {
+        mode = type;
         List<String> arrfFile = createAttributes();
         createData(arrfFile);
         writeToArff(arrfFile);
@@ -79,24 +81,37 @@ public class XesSerializeToArff {
         arffFile.add("@DATA \n");
         for (XTrace trace : logFile) {
             String label = ", " + classifyTrace(trace);
-            String instanceString = traceToString(trace);
+            String instanceString = serializeTrace(trace);
             String arffInstance = instanceString.substring(1, instanceString.length() - 1);
             arffInstance += label;
             arffFile.add(arffInstance);
         }
     }
 
-    private String traceToString(XTrace trace) {
+    private String serializeTrace(XTrace trace) {
         Integer length = attributes.size();
         List<Integer> instance = new ArrayList<>(Collections.nCopies(length, 0));
-        for (XEvent event : trace) {
-            String eventName = XConceptExtension.instance().extractName(event);
-            eventName = eventName.replaceAll("[^A-Za-z0-9 ]", "");
-            eventName = eventName.replaceAll(" ", "_").toLowerCase();
-            Integer index = attributes.indexOf(eventName);
-            instance.set(index, 1);
+        if (mode == SerializationType.BINARY) {
+            for (XEvent event : trace) {
+                int index = getIndexOfEvent(event);
+                instance.set(index, 1);
+            }
+        } else if (mode == SerializationType.FREQUENCY) {
+            for (XEvent event : trace) {
+                int index = getIndexOfEvent(event);
+                int value = instance.get(index);
+                instance.set(index, value + 1);
+            }
         }
         return instance.toString();
+    }
+
+    private int getIndexOfEvent(XEvent event) {
+        String eventName = XConceptExtension.instance().extractName(event);
+        eventName = eventName.replaceAll("[^A-Za-z0-9 ]", "");
+        eventName = eventName.replaceAll(" ", "_").toLowerCase();
+        Integer index = attributes.indexOf(eventName);
+        return index;
     }
 
     private List<String> createAttributes() {
