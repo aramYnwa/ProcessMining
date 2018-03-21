@@ -113,7 +113,7 @@ public class XesSerializeToArff {
 
         // Add the label column which is binary
         // but in ARFF format there is no BINARY type.
-        String labelAttribute = "@ATTRIBUTE label NUMERIC";
+        String labelAttribute = "@ATTRIBUTE class {0, 1}";
         file.add(labelAttribute);
         file.add("\n");
         return file;
