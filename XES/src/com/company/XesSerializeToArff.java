@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class XesSerializeToArff {
+
     private AttributeDictionary dict;
     private String fileName;
     private XLog logFile;
@@ -25,16 +26,16 @@ public class XesSerializeToArff {
         logFile = xlog;
         fileName = attributeDictionary.getDbname();
         arffPath = Paths.get(fileName + ".arff");
-        averageTime = CalculateAverageTime(xlog);
+        averageTime = calculateAverageTime(xlog);
     }
 
-    private Long CalculateAverageTime(XLog xlog) {
+    private Long calculateAverageTime(XLog xlog) {
         long accumulator = 0;
         long temp = 0;
         for (XTrace trace : xlog) {
             long seconds = getTraceDuration(trace);
             accumulator += seconds;
-            temp ++;
+            temp++;
 
         }
         return accumulator / temp;
@@ -45,8 +46,7 @@ public class XesSerializeToArff {
         XEvent firstEvent = trace.get(0);
         Date firstEventTS = XTimeExtension.instance().extractTimestamp(firstEvent);
 
-
-        XEvent lastEvent  = trace.get(length - 1);
+        XEvent lastEvent = trace.get(length - 1);
         Date lastEventTS = XTimeExtension.instance().extractTimestamp(lastEvent);
 
         //Getting difference by days.
@@ -57,11 +57,10 @@ public class XesSerializeToArff {
     }
 
     /**
-     * Our goal is examine slower traces.
-     * We classify by "1" traces which is slow (lasts longer then average)
-     * We classify by "0" traces which is fast.
+     * Our goal is examine slower traces. We classify by "1" traces which is slow (lasts longer then
+     * average) We classify by "0" traces which is fast.
      */
-    private String ClassifyTrace (XTrace trace) {
+    private String classifyTrace(XTrace trace) {
         long traceExecutionTime = getTraceDuration(trace);
         if (traceExecutionTime > averageTime)
             return "1";
@@ -70,24 +69,24 @@ public class XesSerializeToArff {
     }
 
     //FIXME: Add binary and frequency constants to use in parameters.
-    public void BinarySerialize () {
-        List<String> arrfFile = CreateAttributes();
-        CreateData(arrfFile);
-        WriteToArff(arrfFile);
+    public void binarySerialize() {
+        List<String> arrfFile = createAttributes();
+        createData(arrfFile);
+        writeToArff(arrfFile);
     }
 
-    private void CreateData(List<String> arffFile) {
+    private void createData(List<String> arffFile) {
         arffFile.add("@DATA \n");
-        for (XTrace trace :logFile) {
-            String label = ", " + ClassifyTrace(trace);
-            String instanceString = TraceToString(trace);
+        for (XTrace trace : logFile) {
+            String label = ", " + classifyTrace(trace);
+            String instanceString = traceToString(trace);
             String arffInstance = instanceString.substring(1, instanceString.length() - 1);
             arffInstance += label;
-            arffFile.add(arffInstance); 
+            arffFile.add(arffInstance);
         }
     }
 
-    private String TraceToString(XTrace trace) {
+    private String traceToString(XTrace trace) {
         Integer length = attributes.size();
         List<Integer> instance = new ArrayList<>(Collections.nCopies(length, 0));
         for (XEvent event : trace) {
@@ -100,7 +99,7 @@ public class XesSerializeToArff {
         return instance.toString();
     }
 
-    private List<String> CreateAttributes() {
+    private List<String> createAttributes() {
         List<String> file = new ArrayList<>();
 
         String relationName = "@RELATION " + fileName;
@@ -120,7 +119,7 @@ public class XesSerializeToArff {
         return file;
     }
 
-    private void WriteToArff (List<String> file) {
+    private void writeToArff(List<String> file) {
         try {
             Files.write(arffPath, file);
         } catch (Exception e) {
