@@ -1,27 +1,31 @@
 package com.company.xlog;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import org.deckfour.xes.extension.std.XConceptExtension;
+import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 
-
-//FIXME :Make XLongHandler singleton
 public class XLogHandler {
   private HashMap<String, Integer> attributeDictionary;
   private String fileName;
   private XLog logFile;
+  private ArrayList<String> attributes;
+  private Long averageTraceTime;
 
-  public XLogHandler(XLog logFile, String fileName) {
-    this.fileName = fileName;
-    this.logFile = logFile;
-    this.attributeDictionary = new HashMap<>();
-    createAttributeDictionary();
+  public XLogHandler(XLog xlogFile, String logFileName) {
+    fileName = logFileName;
+    logFile = xlogFile;
+    attributeDictionary = new HashMap<>();
+    attributes = createAttributeDictionary();
+    averageTraceTime = calculateAverageTime(logFile);
   }
 
-  private void createAttributeDictionary () {
+  private ArrayList<String> createAttributeDictionary () {
     System.out.println("Creating event dictionary");
     for (XTrace trace : logFile) {
       for (XEvent event : trace) {
@@ -43,13 +47,48 @@ public class XLogHandler {
       }
     }
     System.out.println("Attributes dictionary is ready");
+    return new ArrayList<>(attributeDictionary.keySet());
+  }
+
+  private Long calculateAverageTime(XLog xlog) {
+    long accumulator = 0;
+    long temp = 0;
+    for (XTrace trace : xlog) {
+      long seconds = getTraceDuration(trace);
+      accumulator += seconds;
+      temp++;
+
+    }
+    return accumulator / temp;
+  }
+
+  public long getTraceDuration(XTrace trace) {
+    int length = trace.size();
+    XEvent firstEvent = trace.get(0);
+    Date firstEventTS = XTimeExtension.instance().extractTimestamp(firstEvent);
+
+    XEvent lastEvent = trace.get(length - 1);
+    Date lastEventTS = XTimeExtension.instance().extractTimestamp(lastEvent);
+
+    //Getting difference by days.
+    long days = (lastEventTS.getTime() - firstEventTS.getTime()) / (1000 * 60 * 60 * 24);
+
+    return days;
   }
 
   public String getFileName() {
     return fileName;
   }
-  
-  public HashMap<String, Integer> getAttributeDictionary() {
-    return attributeDictionary;
+
+  public ArrayList<String> getAttributes() {
+    return attributes;
+  }
+
+  public Long getAverageTraceTime() {
+    return averageTraceTime;
+  }
+
+  public XLog getLogFile() {
+    return logFile;
   }
 }
