@@ -1,18 +1,11 @@
-package com.company.classifiers;
+package com.company.serializers;
 
 import com.company.xlog.XLogHandler;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.deckfour.xes.extension.std.XConceptExtension;
-import org.deckfour.xes.model.XEvent;
-import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
 
-public abstract class IndividualActivtyBasedClassifier extends ArffLogClassifier{
+public class AssosiationBasedSerializer extends ArffLogSerializer{
 
-  public IndividualActivtyBasedClassifier(XLogHandler handler) {
+  public AssosiationBasedSerializer(XLogHandler handler) {
     super(handler);
   }
 
@@ -24,7 +17,7 @@ public abstract class IndividualActivtyBasedClassifier extends ArffLogClassifier
     file.add("\n");
 
     for (String attribute : logHandler.getAttributes()) {
-      String arffAttr = "@ATTRIBUTE " + attribute + " NUMERIC";
+      String arffAttr = "@ATTRIBUTE " + attribute + " {0, 1}";
       file.add(arffAttr);
     }
 
@@ -35,4 +28,8 @@ public abstract class IndividualActivtyBasedClassifier extends ArffLogClassifier
     file.add("\n");
   }
 
+  @Override
+  protected void fillValue(List<Integer> instance, int index) {
+      instance.set(index, 1);
+  }
 }

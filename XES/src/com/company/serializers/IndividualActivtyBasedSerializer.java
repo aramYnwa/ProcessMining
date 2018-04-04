@@ -1,11 +1,11 @@
-package com.company.classifiers;
+package com.company.serializers;
 
 import com.company.xlog.XLogHandler;
 import java.util.List;
 
-public class AssosiationBasedClassifier extends ArffLogClassifier{
+public abstract class IndividualActivtyBasedSerializer extends ArffLogSerializer{
 
-  public AssosiationBasedClassifier(XLogHandler handler) {
+  public IndividualActivtyBasedSerializer(XLogHandler handler) {
     super(handler);
   }
 
@@ -17,7 +17,7 @@ public class AssosiationBasedClassifier extends ArffLogClassifier{
     file.add("\n");
 
     for (String attribute : logHandler.getAttributes()) {
-      String arffAttr = "@ATTRIBUTE " + attribute + " {0, 1}";
+      String arffAttr = "@ATTRIBUTE " + attribute + " NUMERIC";
       file.add(arffAttr);
     }
 
@@ -28,8 +28,4 @@ public class AssosiationBasedClassifier extends ArffLogClassifier{
     file.add("\n");
   }
 
-  @Override
-  protected void fillValue(List<Integer> instance, int index) {
-      instance.set(index, 1);
-  }
 }

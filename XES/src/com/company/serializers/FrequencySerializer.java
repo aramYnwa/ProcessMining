@@ -1,11 +1,11 @@
-package com.company.classifiers;
+package com.company.serializers;
 
 import com.company.xlog.XLogHandler;
 import java.util.List;
 
-public class FrequencyClassifier extends IndividualActivtyBasedClassifier {
+public class FrequencySerializer extends IndividualActivtyBasedSerializer {
 
-  public FrequencyClassifier (XLogHandler handler) {
+  public FrequencySerializer (XLogHandler handler) {
     super(handler);
   }
 

@@ -1,4 +1,4 @@
-package com.company;
+package com.company.xlog;
 import java.io.File;
 
 import org.deckfour.xes.in.XMxmlGZIPParser;

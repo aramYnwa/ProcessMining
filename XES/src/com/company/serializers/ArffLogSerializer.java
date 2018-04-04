@@ -1,4 +1,4 @@
-package com.company.classifiers;
+package com.company.serializers;
 
 import com.company.xlog.XLogHandler;
 import java.nio.file.Files;
@@ -12,17 +12,16 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 
-public abstract class ArffLogClassifier {
+public abstract class ArffLogSerializer {
   protected Path arffPath;
   protected long averageTime;
   protected ArrayList<String> attributes;
   protected XLogHandler logHandler;
 
-  public ArffLogClassifier(XLogHandler logHandler) {
+  public ArffLogSerializer(XLogHandler logHandler) {
     this.logHandler = logHandler;
     attributes = new ArrayList<>();
     attributes = logHandler.getAttributes();
-    arffPath = Paths.get(logHandler.getFileName() + ".arff");
     averageTime = logHandler.getAverageTraceTime();
   }
 
@@ -88,10 +87,15 @@ public abstract class ArffLogClassifier {
 
   private void writeToArff(List<String> file) {
     try {
+      arffPath = Paths.get(logHandler.getFileName() + ".arff");
       Files.write(arffPath, file);
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
+  }
+
+  public Path getArffPath() {
+    return arffPath;
   }
 
   protected void fillValue(List<Integer> instance, int index) {

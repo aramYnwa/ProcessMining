@@ -1,8 +1,6 @@
 package com.company.weka.api;
 
-import weka.associations.Apriori;
-import weka.associations.AssociationRule;
-import weka.associations.AssociationRules;
+import com.company.serializers.IndividualActivtyBasedSerializer;
 import weka.classifiers.AbstractClassifier;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.classifiers.trees.J48;
@@ -12,10 +10,10 @@ import weka.core.Instances;
 public class ClassifyLog {
   private DataSource source;
 
-  public void run () {
+  public void classify (IndividualActivtyBasedSerializer serializer) {
     try {
 
-      source = new DataSource("Hospital.arff");
+      source = new DataSource(serializer.getArffPath().toString());
 
       Instances dataSet = source.getDataSet();
       dataSet.setClassIndex(dataSet.numAttributes() - 1);
@@ -41,7 +39,7 @@ public class ClassifyLog {
       System.out.println("Running classifier on test data");
       predict(testSet, decisionTree);
 
-      System.out.printf("\nDecision Tree Graph \n %s \n", decisionTree.graph());
+      //System.out.printf("\nDecision Tree Graph \n %s \n", decisionTree.graph());
 
     } catch (Exception e) {
       System.out.println(e.getMessage());
@@ -66,36 +64,4 @@ public class ClassifyLog {
     }
 
   }
-
-
-  public void experement() {
-    try {
-      source = new DataSource("Hospital.arff");
-
-      //source = new DataSource("dataMining.arff");
-      Instances data = source.getDataSet();
-
-      Apriori aprioriModel = new Apriori();
-      String[] options = new String[4];
-      options[0] = "-Z";
-      options[1] = "-I";
-      options[2] = "-M";
-      options[3] = "0.5";
-
-
-
-      aprioriModel.setOptions(options);
-
-      aprioriModel.buildAssociations(data);
-      //System.out.println(aprioriModel);
-
-      AssociationRules rules = aprioriModel.getAssociationRules();
-      for(AssociationRule rule : rules.getRules()) {
-        System.out.println(rule.toString());
-      }
-    } catch (Exception e ){
-      System.out.println(e.getMessage());
-    }
-  }
-
 }

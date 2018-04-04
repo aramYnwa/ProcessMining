@@ -1,11 +1,11 @@
-package com.company.classifiers;
+package com.company.serializers;
 
 import com.company.xlog.XLogHandler;
 import java.util.List;
 
-public class BinaryClassifier extends IndividualActivtyBasedClassifier {
+public class BinarySerializer extends IndividualActivtyBasedSerializer {
 
-  public BinaryClassifier (XLogHandler handler) {
+  public BinarySerializer (XLogHandler handler) {
     super(handler);
   }
 
