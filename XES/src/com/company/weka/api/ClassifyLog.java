@@ -1,6 +1,6 @@
 package com.company.weka.api;
 
-import com.company.serializers.IndividualActivtyBasedSerializer;
+import com.company.serializers.ArffLogSerializer;
 import weka.classifiers.AbstractClassifier;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.classifiers.trees.J48;
@@ -10,7 +10,7 @@ import weka.core.Instances;
 public class ClassifyLog {
   private DataSource source;
 
-  public void classify (IndividualActivtyBasedSerializer serializer) {
+  public void classify (ArffLogSerializer serializer) {
     try {
 
       source = new DataSource(serializer.getArffPath().toString());

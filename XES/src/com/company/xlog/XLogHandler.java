@@ -15,9 +15,11 @@ public class XLogHandler {
   private String fileName;
   private XLog logFile;
   private ArrayList<String> attributes;
+  private ArrayList<ArrayList<String>> log;
   private Long averageTraceTime;
 
   public XLogHandler(XLog xlogFile, String logFileName) {
+    log = new ArrayList<>();
     fileName = logFileName;
     logFile = xlogFile;
     attributeDictionary = new HashMap<>();
@@ -28,6 +30,7 @@ public class XLogHandler {
   private ArrayList<String> createAttributeDictionary () {
     System.out.println("Creating event dictionary");
     for (XTrace trace : logFile) {
+      ArrayList <String> traceString = new ArrayList<>();
       for (XEvent event : trace) {
         XAttributeMap attributes = event.getAttributes();
         String conceptName = XConceptExtension.KEY_NAME;
@@ -36,7 +39,7 @@ public class XLogHandler {
           String key = attributes.get(conceptName).toString();
           key = key.replaceAll("[^A-Za-z0-9 ]", "");
           key = key.replaceAll(" ", "_").toLowerCase();
-          //XAttribute code = attributes.get("Activity code");
+          traceString.add(key);
           if (attributeDictionary.containsKey(key)) {
             Integer frequency = attributeDictionary.get(key);
             attributeDictionary.put(key, frequency + 1);
@@ -45,6 +48,7 @@ public class XLogHandler {
           }
         }
       }
+      log.add(traceString);
     }
     System.out.println("Attributes dictionary is ready");
     return new ArrayList<>(attributeDictionary.keySet());
@@ -90,5 +94,9 @@ public class XLogHandler {
 
   public XLog getLogFile() {
     return logFile;
+  }
+
+  public ArrayList<ArrayList<String>> getLog() {
+    return log;
   }
 }

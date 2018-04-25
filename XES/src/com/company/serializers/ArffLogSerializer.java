@@ -39,7 +39,7 @@ public abstract class ArffLogSerializer {
 
   }
 
-  private void createData (List<String> file) {
+  protected void createData (List<String> file) {
     file.add("@DATA \n");
 
 
@@ -67,7 +67,7 @@ public abstract class ArffLogSerializer {
    * Our goal is examine slower traces. We classify by "1" traces which is slow (lasts longer then
    * average) We classify by "0" traces which is fast.
    */
-  private String classifyTrace(XTrace trace) {
+  protected String classifyTrace(XTrace trace) {
     long traceExecutionTime = logHandler.getTraceDuration(trace);
     if (traceExecutionTime > averageTime)
       return "1";
@@ -75,7 +75,7 @@ public abstract class ArffLogSerializer {
       return "0";
   }
 
-  private String serializeTrace(XTrace trace) {
+  protected String serializeTrace(XTrace trace) {
     Integer length = attributes.size();
     List<Integer> instance = new ArrayList<>(Collections.nCopies(length, 0));
     for (XEvent event : trace) {

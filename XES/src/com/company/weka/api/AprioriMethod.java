@@ -2,9 +2,11 @@ package com.company.weka.api;
 
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import weka.associations.Apriori;
 import weka.associations.AssociationRule;
+import weka.associations.Item;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -17,10 +19,10 @@ public class AprioriMethod {
     this.sourcePath = sourcePath;
   }
 
-  public void findFrequentItemsets () {
+  public ArrayList<ArrayList<String>> findFrequentItemsets () {
+    ArrayList<ArrayList<String>> frequentItemsets = new ArrayList<>();
       try {
         DataSource source = new DataSource(sourcePath.toString());
-
         Instances dataSet = source.getDataSet();
         //FIXME: by default last one is class.
         dataSet.setClassIndex(dataSet.numAttributes() - 1);
@@ -35,13 +37,38 @@ public class AprioriMethod {
         aprioriModel.setOptions(options);
         aprioriModel.buildAssociations(dataSet);
 
-        List<AssociationRule> rules = aprioriModel.getAssociationRules().getRules();
-        for (AssociationRule rule :rules) {
-          System.out.println(rule.toString());
-        }
+        System.out.println(aprioriModel);
+
+        frequentItemsets = aprioriModel.getM_LsToString();
+
       } catch (Exception e) {
         System.out.println(e.getMessage());
       }
+    return frequentItemsets;
+  }
+
+  private ArrayList<ArrayList<String>> parseRules (List<AssociationRule> rules) {
+    ArrayList<ArrayList<String>> rulesAttrCollection = new ArrayList<>();
+    for (AssociationRule rule : rules) {
+      ArrayList<String> ruleAttributes = new ArrayList<>();
+      System.out.println(rule);
+      ArrayList<Item> premise = new ArrayList<>(rule.getPremise());
+      ArrayList<Item> consequence = new ArrayList<>(rule.getConsequence());
+
+      System.out.println(premise);
+      System.out.println(consequence);
+      System.out.println("\n");
+      premise.addAll(consequence);
+
+      for(Item item : premise){
+        System.out.println(item.getAttribute().name());
+        ruleAttributes.add(item.getAttribute().name());
+      }
+      if (!rulesAttrCollection.contains(ruleAttributes)) {
+        rulesAttrCollection.add(ruleAttributes);
+      }
+    }
+    return rulesAttrCollection;
   }
 
 }
