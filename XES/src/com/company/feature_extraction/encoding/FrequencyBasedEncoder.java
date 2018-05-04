@@ -38,6 +38,7 @@ public class FrequencyBasedEncoder {
 
   //FIXME:: Change this to use local xlog file.
   public void encodeTraces(XLog logTracesToEncode) {
+    //FIXME:: Move this part to XLogManager
     for (XTrace trace : logTracesToEncode) {
       for (XEvent event : trace) {
         String eventLabel = XConceptExtension.instance().extractName(event);

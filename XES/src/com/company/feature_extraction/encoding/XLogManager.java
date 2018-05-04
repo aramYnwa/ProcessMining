@@ -68,4 +68,8 @@ public class XLogManager {
     else
       return Double.valueOf("0");
   }
+
+  public XLog getxLog() {
+    return xLog;
+  }
 }

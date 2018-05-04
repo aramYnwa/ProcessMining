@@ -1,19 +1,16 @@
 package com.company;
 
-import com.company.serializers.AssosiationBasedBinarySerializer;
-import com.company.serializers.AssosiationBasedSerializer;
-import com.company.serializers.BinarySerializer;
-import com.company.serializers.FrequencySerializer;
-import com.company.serializers.IndividualActivtyBasedSerializer;
-import com.company.weka.api.AprioriMethod;
+import com.company.feature_extraction.encoding.AssociationBasedEncoder;
+import com.company.feature_extraction.encoding.AssociationBasedFrequencyEncoder;
+import com.company.feature_extraction.encoding.XLogManager;
 import com.company.weka.api.ClassifyLog;
-import com.company.xlog.XLogHandler;
 import com.company.xlog.XLogReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.ArrayList;
 import org.deckfour.xes.model.*;
-
+import weka.associations.Apriori;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 
 
 public class Main {
@@ -22,24 +19,34 @@ public class Main {
 
 		try {
 
-			ClassifyLog classifier =  new ClassifyLog();
-			XLog log = XLogReader.openLog("hospital_log.xes");
+			XLog log = XLogReader.openLog("sepsis_cases.xes");
 
-			XLogHandler handler = new XLogHandler(log, "Hospital");
+			//FrequencyBasedEncoder frequencyBasedEncoder = new FrequencyBasedEncoder(log);
+			AssociationBasedEncoder frequencyBasedEncoder = new AssociationBasedEncoder(log);
+			frequencyBasedEncoder.encodeTraces(log);
 
+			Instances instances = frequencyBasedEncoder.getEncodedTraces();
 
-			AssosiationBasedSerializer assS = new AssosiationBasedSerializer(handler);
-			assS.serialize();
+			Apriori apriori = new Apriori();
 
-			AprioriMethod aprioriMethod = new AprioriMethod(0.5, assS.getArffPath());
-			ArrayList<ArrayList<String>> frequentItemsets = aprioriMethod.findFrequentItemsets();
+			String[] options = new String[2];
+			options[0] = "-S";
+			options[1] = "0.8";
+			apriori.setOptions(options);
+			apriori.buildAssociations(instances);
 
-			AssosiationBasedBinarySerializer abbs = new AssosiationBasedBinarySerializer(handler, frequentItemsets);
-			abbs.serialize();
+			ArrayList<ArrayList<String>> frequentItemsets = apriori.getM_LsToString();
+			XLogManager manager = new XLogManager(log);
+			AssociationBasedFrequencyEncoder encoder = new AssociationBasedFrequencyEncoder(manager,
+					frequentItemsets);
+			encoder.encodeTraces();
 
-			classifier.classify(abbs);
+			instances = encoder.getEncodedTraces();
+			ArffSaver saver = new ArffSaver();
+			saver.setInstances(instances);
+			saver.setFile(new File("aa.arff"));
+			saver.writeBatch();
 
-	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

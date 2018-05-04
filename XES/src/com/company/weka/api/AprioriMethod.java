@@ -28,11 +28,13 @@ public class AprioriMethod {
         dataSet.setClassIndex(dataSet.numAttributes() - 1);
 
         Apriori aprioriModel = new Apriori();
-        String[] options = new String[4];
-        options[0] = "-Z"; // intends that first class is for missing values
-        options[1] = "-I";
+        String[] options = new String[6];
+        options[0] = "-C"; // intends that first class is for missing values
+        options[1] = "-0.1";
         options[2] = "-M";
         options[3] = frequency.toString();
+        options[4] = "-N";
+        options[5] = "100";
 
         aprioriModel.setOptions(options);
         aprioriModel.buildAssociations(dataSet);
