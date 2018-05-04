@@ -1,12 +1,14 @@
 package com.company;
 
-import com.company.feature_extraction.encoding.AssociationBasedEncoder;
-import com.company.feature_extraction.encoding.AssociationBasedFrequencyEncoder;
+import com.company.ML.DecisionTreeJ48;
+import com.company.feature_extraction.encoding.SequenceBasedEncoder;
+import com.company.feature_extraction.encoding.SetBasedEncoder;
+import com.company.feature_extraction.encoding.SetBasedBinaryEncoder;
 import com.company.feature_extraction.encoding.XLogManager;
-import com.company.weka.api.ClassifyLog;
 import com.company.xlog.XLogReader;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 import org.deckfour.xes.model.*;
 import weka.associations.Apriori;
 import weka.core.Instances;
@@ -19,10 +21,10 @@ public class Main {
 
 		try {
 
-			XLog log = XLogReader.openLog("sepsis_cases.xes");
+			XLog log = XLogReader.openLog("hospital_log_cut.xes");
 
 			//FrequencyBasedEncoder frequencyBasedEncoder = new FrequencyBasedEncoder(log);
-			AssociationBasedEncoder frequencyBasedEncoder = new AssociationBasedEncoder(log);
+			SetBasedEncoder frequencyBasedEncoder = new SetBasedEncoder(log);
 			frequencyBasedEncoder.encodeTraces(log);
 
 			Instances instances = frequencyBasedEncoder.getEncodedTraces();
@@ -37,15 +39,19 @@ public class Main {
 
 			ArrayList<ArrayList<String>> frequentItemsets = apriori.getM_LsToString();
 			XLogManager manager = new XLogManager(log);
-			AssociationBasedFrequencyEncoder encoder = new AssociationBasedFrequencyEncoder(manager,
-					frequentItemsets);
+
+			//SetBasedBinaryEncoder encoder = new SetBasedBinaryEncoder(manager, frequentItemsets);
+			SequenceBasedEncoder encoder = new SequenceBasedEncoder(manager, frequentItemsets);
 			encoder.encodeTraces();
 
 			instances = encoder.getEncodedTraces();
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(instances);
-			saver.setFile(new File("aa.arff"));
+			saver.setFile(new File("a1.arff"));
 			saver.writeBatch();
+
+			DecisionTreeJ48 j48 = new DecisionTreeJ48(instances);
+			j48.classify();
 
 		} catch (Exception e) {
 			e.printStackTrace();
