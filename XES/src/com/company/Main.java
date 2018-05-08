@@ -21,7 +21,7 @@ public class Main {
 
 		try {
 
-			XLog log = XLogReader.openLog("hospital_log_cut.xes");
+			XLog log = XLogReader.openLog("logs/hospital_log_cut.xes");
 
 			//FrequencyBasedEncoder frequencyBasedEncoder = new FrequencyBasedEncoder(log);
 			SetBasedEncoder frequencyBasedEncoder = new SetBasedEncoder(log);
@@ -47,7 +47,7 @@ public class Main {
 			instances = encoder.getEncodedTraces();
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(instances);
-			saver.setFile(new File("a1.arff"));
+			saver.setFile(new File("arffFiles/a1.arff"));
 			saver.writeBatch();
 
 			DecisionTreeJ48 j48 = new DecisionTreeJ48(instances);
