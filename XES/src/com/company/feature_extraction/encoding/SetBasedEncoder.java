@@ -2,10 +2,6 @@ package com.company.feature_extraction.encoding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import javax.xml.bind.annotation.XmlEnumValue;
-import org.deckfour.xes.extension.std.XConceptExtension;
-import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import weka.core.Attribute;
@@ -15,64 +11,96 @@ import weka.core.Instances;
 
 public class SetBasedEncoder {
 
-  Map<String, Integer> alphabetMap = new HashMap<String, Integer>();
-  HashMap<Integer, XTrace> traceMapping = new HashMap<Integer, XTrace>();
-  Instances encodedTraces = null;
+  EncodingType encodingType = null;
   XLogManager xLogManager = null;
+  XLog xLog = null;
+  Instances encodedTraces = null;
 
-  public SetBasedEncoder(XLog xLog) {
-    this.xLogManager = new XLogManager(xLog);
+  public SetBasedEncoder(XLog log, EncodingType encodingType) {
+    this.xLog = log;
+    this.xLogManager = new XLogManager(log);
+    this.encodingType = encodingType;
   }
 
-  public void encodeTraces(XLog logTracesToEncode) {
-    for (XTrace trace : logTracesToEncode) {
-      for (XEvent event : trace) {
-        String eventLabel = XConceptExtension.instance().extractName(event);
-        Integer index = alphabetMap.get(eventLabel);
+  /**
+   *
+   */
+  public void encodeTraces() {
+    ItemSetExtracter itemSetExtracter = new ItemSetExtracter(xLog);
+    ArrayList<ArrayList<String>> frequentItemsets = itemSetExtracter.extractItemSets();
 
-        if (index == null) {
-          index = alphabetMap.size();
-          alphabetMap.put(eventLabel, index);
-        }
-      }
+    if (frequentItemsets == null) {
+      System.out.println("Empty frequent itemsets");
     }
 
-    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-    for (int i = 0; i < alphabetMap.size(); ++i) {
+    Integer frequentItemsetsCount = frequentItemsets.size();
+
+    //Starting set based encoding.
+    ArrayList<Attribute> attributes = new ArrayList<>();
+    for (int i = 0; i < frequentItemsets.size(); ++i) {
       attributes.add(null);
     }
 
-    // For weka.apriori features should have some exact form.
-    // They should be nominal and have a value {t}
-    ArrayList<String> labelValues = new ArrayList<>();
-    labelValues.add("t");
-    for (String key : alphabetMap.keySet()) {
-      Attribute attr = new Attribute(key, labelValues);
-      attributes.set(alphabetMap.get(key), attr);
+    int i = 0;
+    for (ArrayList<String> itemSet : frequentItemsets) {
+      String setName = itemSet.toString();
+      Attribute attribute = new Attribute(setName, i);
+      attributes.set(i, attribute);
+      i++;
     }
 
-    encodedTraces = new Instances("DATA", attributes, logTracesToEncode.size());
+    ArrayList<String> labelValues = new ArrayList<>();
+    labelValues.add("0");
+    labelValues.add("1");
 
+    Attribute label = new Attribute("label", labelValues);
+    attributes.add(label);
 
-    int i = 0;
-    for (XTrace trace : logTracesToEncode) {
-      Instance instance = new DenseInstance(alphabetMap.size());
-      instance.setDataset(encodedTraces);
-      /*for (int j = 0; j < alphabetMap.size(); ++j) {
-        instance.setValue(j, "?");
-      }*/
+    encodedTraces = new Instances("DATA", attributes, xLog.size());
 
-      //Adding true values.
-      for (XEvent event : trace) {
-        String eventName = XConceptExtension.instance().extractName(event);
-        Integer index = alphabetMap.get(eventName);
+    i = 0;
+    for (XTrace trace : xLog) {
+      Instance instance = new DenseInstance(frequentItemsetsCount + 1);
 
-        instance.setValue(index, "t");
+      for (int j = 0; j < frequentItemsetsCount; ++j) {
+        instance.setValue(j, 0);
       }
 
+      HashMap<String, Integer> eventFreqMap = xLogManager.getEventFrequencyMap(trace);
+
+      for (int j = 0; j < frequentItemsetsCount; ++j) {
+        ArrayList<String> itemSet = frequentItemsets.get(j);
+        Double count = getCountOfItemSetInTrace(itemSet, eventFreqMap, encodingType);
+        instance.setValue(j, count);
+      }
+
+      Double traceClass = xLogManager.classifyTrace(trace);
+      instance.setValue(frequentItemsetsCount, traceClass);
       encodedTraces.add(instance);
-      traceMapping.put(i, trace);
       i++;
+    }
+  }
+
+  private Double getCountOfItemSetInTrace(ArrayList<String> itemSet,
+      HashMap<String, Integer> eventMap, EncodingType encodingType) {
+    double count = Double.MAX_VALUE;
+    for (String item : itemSet) {
+      if (!eventMap.containsKey(item)) {
+        count = 0.0;
+        return count;
+      } else {
+        Integer value = eventMap.get(item);
+        if (value < count)
+          count = value;
+      }
+    }
+    if (encodingType.equals(EncodingType.BINARY))
+      return 1.0;
+    if (encodingType.equals(EncodingType.FREQUENCY))
+      return count;
+    else {
+      System.out.println("Encoding type error!");
+      return count;
     }
   }
 

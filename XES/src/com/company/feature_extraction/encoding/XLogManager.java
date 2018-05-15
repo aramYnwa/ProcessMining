@@ -2,6 +2,8 @@ package com.company.feature_extraction.encoding;
 
 import com.company.xlog.XLogHandler;
 import java.util.Date;
+import java.util.HashMap;
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -67,6 +69,25 @@ public class XLogManager {
       return Double.valueOf("1");
     else
       return Double.valueOf("0");
+  }
+
+  /**
+   * For a certain trace returns map of events and their frequency number.
+   * @param xTrace
+   * @return
+   */
+  HashMap<String, Integer> getEventFrequencyMap (XTrace xTrace) {
+    HashMap<String, Integer> map = new HashMap<>();
+    for (XEvent event : xTrace) {
+      String eventName = XConceptExtension.instance().extractName(event);
+      if (!map.containsKey(eventName)) {
+        map.put(eventName, 1);
+      } else {
+        Integer value = map.get(eventName);
+        map.put(eventName, value + 1);
+      }
+    }
+    return map;
   }
 
   public XLog getxLog() {
