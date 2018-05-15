@@ -13,7 +13,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 
-public class FrequencyBasedEncoder {
+public class IndividualActivityEncoder {
 
   Map<String, Integer> alphabetMap = new HashMap<String, Integer>();
   HashMap<Integer, XTrace> traceMapping = new HashMap<Integer, XTrace>();
@@ -21,7 +21,7 @@ public class FrequencyBasedEncoder {
   XLogManager xLogManager = null;
   EncodingType encodingType;
 
-  public FrequencyBasedEncoder (XLog xlog, EncodingType encodingType) {
+  public IndividualActivityEncoder(XLog xlog, EncodingType encodingType) {
     this.xLogManager = new XLogManager(xlog);
     this.encodingType = encodingType;
   }
