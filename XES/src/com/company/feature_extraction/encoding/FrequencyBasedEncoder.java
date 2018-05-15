@@ -19,9 +19,11 @@ public class FrequencyBasedEncoder {
   HashMap<Integer, XTrace> traceMapping = new HashMap<Integer, XTrace>();
   Instances encodedTraces = null;
   XLogManager xLogManager = null;
+  EncodingType encodingType;
 
-  public FrequencyBasedEncoder (XLog xlog) {
+  public FrequencyBasedEncoder (XLog xlog, EncodingType encodingType) {
     this.xLogManager = new XLogManager(xlog);
+    this.encodingType = encodingType;
   }
 
   public HashMap<Integer, XTrace> getTraceMapping() {
@@ -41,12 +43,12 @@ public class FrequencyBasedEncoder {
     //FIXME:: Move this part to XLogManager
     for (XTrace trace : logTracesToEncode) {
       for (XEvent event : trace) {
-        String eventLabel = XConceptExtension.instance().extractName(event);
-        Integer index = alphabetMap.get(eventLabel);
+        String eventName = XConceptExtension.instance().extractName(event);
+        Integer index = alphabetMap.get(eventName);
 
         if (index == null) {
           index = alphabetMap.size();
-          alphabetMap.put(eventLabel, index);
+          alphabetMap.put(eventName, index);
         }
       }
     }
@@ -72,31 +74,55 @@ public class FrequencyBasedEncoder {
 
     encodedTraces = new Instances("DATA", attributes, logTracesToEncode.size());
 
-    int i = 0;
-    for (XTrace trace : logTracesToEncode) {
-      Instance instance = new DenseInstance(alphabetMap.size() + 1);
+    Integer classIndex = attributes.size() - 1;
+    if (encodingType.equals(EncodingType.FREQUENCY)) {
+      int i = 0;
+      for (XTrace trace : logTracesToEncode) {
+        Instance instance = new DenseInstance(alphabetMap.size() + 1);
 
-      //FIXME :: This part might be optimized
-      for (int j = 0; j < alphabetMap.size(); ++j) {
-        instance.setValue(j, new Double(0));
+        //FIXME :: This part might be optimized
+        for (int j = 0; j < alphabetMap.size(); ++j) {
+          instance.setValue(j, new Double(0));
+        }
+
+        for (XEvent event : trace) {
+          String eventName = XConceptExtension.instance().extractName(event);
+          Integer index = alphabetMap.get(eventName);
+          Double value = instance.value(index);
+          //FIXME:: It seems the check below is redundant.
+          if (value.isNaN())
+            instance.setValue(index, 1);
+          else
+            instance.setValue(index, value + 1);
+        }
+
+        Double traceClass = xLogManager.classifyTrace(trace);
+        instance.setValue(classIndex, traceClass);
+        encodedTraces.add(instance);
+        traceMapping.put(i, trace);
+        i++;
       }
+    } else if (encodingType.equals(EncodingType.BINARY)) {
+      int i = 0;
+      for (XTrace trace : logTracesToEncode) {
+        Instance instance = new DenseInstance(alphabetMap.size() + 1);
 
-      for (XEvent event : trace) {
-        String eventLabel = XConceptExtension.instance().extractName(event);
-        Integer index = alphabetMap.get(eventLabel);
-        Double value = instance.value(index);
-        //FIXME:: It seems the check below is redundant.
-        if (value.isNaN())
-          instance.setValue(index, new Double(1));
-        else
-          instance.setValue(index, value + 1);
+        for (int j = 0; j < alphabetMap.size(); ++j) {
+          instance.setValue(j, 0);
+        }
+
+        for (XEvent event : trace) {
+          String eventName = XConceptExtension.instance().extractName(event);
+          Integer index = alphabetMap.get(eventName);
+          instance.setValue(index, 1);
+        }
+
+        Double traceClass = xLogManager.classifyTrace(trace);
+        instance.setValue(classIndex, traceClass);
+        encodedTraces.add(instance);
+        traceMapping.put(i, trace);
+        i++;
       }
-
-      Double traceClass = xLogManager.classifyTrace(trace);
-      instance.setValue(attributes.size() - 1, traceClass);
-      encodedTraces.add(instance);
-      traceMapping.put(i, trace);
-      i++;
     }
   }
 }
