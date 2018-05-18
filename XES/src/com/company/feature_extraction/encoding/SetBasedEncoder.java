@@ -26,6 +26,7 @@ public class SetBasedEncoder {
    *
    */
   public void encodeTraces() {
+    HashMap<XTrace, Double> traceLabelMap = xLogManager.traceLabelMap;
     ItemSetExtracter itemSetExtracter = new ItemSetExtracter(xLog);
     ArrayList<ArrayList<String>> frequentItemsets = itemSetExtracter.extractItemSets();
 
@@ -74,7 +75,7 @@ public class SetBasedEncoder {
         instance.setValue(j, count);
       }
 
-      Double traceClass = xLogManager.classifyTrace(trace);
+      double traceClass = traceLabelMap.get(trace);
       instance.setValue(frequentItemsetsCount, traceClass);
       encodedTraces.add(instance);
       i++;

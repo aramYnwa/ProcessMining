@@ -13,10 +13,23 @@ public class XLogManager {
 
   XLog xLog;
   Long logAveragePerformance;
+  HashMap<XTrace, Double> traceLabelMap = null;
 
   public XLogManager (XLog xLog) {
     this.xLog = xLog;
-    logAveragePerformance = calculateAverageTime(xLog);
+    this.logAveragePerformance = calculateAverageTime(xLog);
+    labelTraces();
+  }
+
+  /**
+   * Function for labeling all traces.
+   */
+  private void labelTraces() {
+    traceLabelMap = new HashMap<>();
+    for (XTrace trace : this.xLog){
+      Double label = classifyTrace(trace);
+      traceLabelMap.put(trace, label);
+    }
   }
 
   /**
@@ -60,10 +73,11 @@ public class XLogManager {
    * For each trace function returns
    *  "1" if given trace is variant
    *  "0" if given trace is normal
+   *
    * @param trace
    * @return
    */
-  public Double classifyTrace (XTrace trace) {
+  private Double classifyTrace (XTrace trace) {
     long tracePerformance = getTraceDuration(trace);
     if (tracePerformance > logAveragePerformance)
       return Double.valueOf("1");
@@ -92,5 +106,9 @@ public class XLogManager {
 
   public XLog getxLog() {
     return xLog;
+  }
+
+  public HashMap<XTrace, Double> getTraceLabelMap() {
+    return traceLabelMap;
   }
 }

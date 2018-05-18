@@ -28,6 +28,7 @@ public class SequenceBasedEncoder {
 
   public void encodeTraces( ) {
     XLog logTracesToEncode = xLogManager.getxLog();
+    HashMap<XTrace, Double> traceLabelMap = xLogManager.traceLabelMap;
 
     for (XTrace trace : logTracesToEncode) {
       for (XEvent event : trace) {
@@ -82,7 +83,7 @@ public class SequenceBasedEncoder {
         instance.setValue(j, count);
       }
 
-      Double traceClass = xLogManager.classifyTrace(trace);
+      Double traceClass = traceLabelMap.get(trace);
       instance.setValue(attributes.size() - 1, traceClass);
       encodedTraces.add(instance);
       traceMapping.put(i, trace);

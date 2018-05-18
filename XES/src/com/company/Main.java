@@ -21,15 +21,16 @@ public class Main {
 			//XLog log = XLogReader.openLog("logs/hospital_log.xes");
 			XLog log = XLogReader.openLog("logs/sepsis_cases.xes");
 
-			SignatureDiscoveryInput input = new SignatureDiscoveryInput();
+
+	/*		SignatureDiscoveryInput input = new SignatureDiscoveryInput();
 			input.removeAllFeatures();
 			input.addFeature("Tandem Repeat");
 			input.addFeature("Maximal Repeat");
 			input.addFeature("Tandem Repeat Alphabet");
 			input.addFeature("Maximal Repeat Alphabet");
 			DiscoverSignatures discoverSignatures = new DiscoverSignatures(log, input);
-
-			discoverSignatures.getFinalRuleList();
+*/
+			//discoverSignatures.getFinalRuleList();
 			//IndividualActivityEncoder encoder = new IndividualActivityEncoder(log, EncodingType.FREQUENCY);
 			SetBasedEncoder encoder = new SetBasedEncoder(log, EncodingType.BINARY);
 			encoder.encodeTraces();

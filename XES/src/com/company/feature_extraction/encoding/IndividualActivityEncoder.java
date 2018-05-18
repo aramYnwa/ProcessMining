@@ -40,6 +40,8 @@ public class IndividualActivityEncoder {
 
   //FIXME:: Change this to use local xlog file.
   public void encodeTraces(XLog logTracesToEncode) {
+    HashMap<XTrace, Double> traceLabelMap = xLogManager.traceLabelMap;
+
     //FIXME:: Move this part to XLogManager
     for (XTrace trace : logTracesToEncode) {
       for (XEvent event : trace) {
@@ -96,7 +98,7 @@ public class IndividualActivityEncoder {
             instance.setValue(index, value + 1);
         }
 
-        Double traceClass = xLogManager.classifyTrace(trace);
+        Double traceClass = traceLabelMap.get(trace);
         instance.setValue(classIndex, traceClass);
         encodedTraces.add(instance);
         traceMapping.put(i, trace);
@@ -117,7 +119,7 @@ public class IndividualActivityEncoder {
           instance.setValue(index, 1);
         }
 
-        Double traceClass = xLogManager.classifyTrace(trace);
+        Double traceClass = traceLabelMap.get(trace);
         instance.setValue(classIndex, traceClass);
         encodedTraces.add(instance);
         traceMapping.put(i, trace);
