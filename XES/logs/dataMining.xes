@@ -11,6 +11,7 @@
 		<event>
 			<date key="time:timestamp" value="2014-10-20T15:08:46.252Z"/>
 			<string key="concept:name" value="B"/>
+			<string key="life" value="B"/>
 		</event>
 		<event>
 			<date key="time:timestamp" value="2014-10-20T15:08:46.252Z"/>

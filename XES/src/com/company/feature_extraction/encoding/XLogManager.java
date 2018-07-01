@@ -14,11 +14,28 @@ public class XLogManager {
   XLog xLog;
   Long logAveragePerformance;
   HashMap<XTrace, Double> traceLabelMap = null;
+  HashMap<String, Integer> alphabetMap = null;
 
   public XLogManager (XLog xLog) {
     this.xLog = xLog;
     this.logAveragePerformance = calculateAverageTime(xLog);
     labelTraces();
+    createLogAlphabetMap();
+  }
+
+  public void createLogAlphabetMap() {
+    alphabetMap = new HashMap<>();
+    for (XTrace trace : xLog) {
+      for (XEvent event : trace) {
+        String eventName = XConceptExtension.instance().extractName(event);
+        Integer index = alphabetMap.get(eventName);
+
+        if (index == null) {
+          index = alphabetMap.size();
+          alphabetMap.put(eventName, index);
+        }
+      }
+    }
   }
 
   /**
