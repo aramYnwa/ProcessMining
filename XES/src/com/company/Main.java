@@ -1,12 +1,14 @@
 package com.company;
 
 import com.company.ML.DecisionTreeJ48;
+import com.company.feature_extraction.encoding.*;
 import com.company.xlog.XLogHandler;
 import com.company.xlog.XLogReader;
 import java.io.File;
 import java.util.List;
 import org.deckfour.xes.model.*;
 
+import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.xstream.XLogConverter;
 import org.processmining.plugins.signaturediscovery.DiscoverSignatures;
 import org.processmining.plugins.signaturediscovery.SignatureDiscoveryInput;
@@ -19,24 +21,36 @@ public class Main {
 	public static void main(String args[]) {
 
 		try {
-			 XLog log = XLogReader.openLog("logs/hospital_log.xes");
-			 XLogHandler logHandler = new XLogHandler(log,"hospital");
 
-			XLogConverter converter = new XLogConverter();
-			 //XLog log = XLogReader.openLog("logs/data.xes");
+			XLog log = XLogReader.openLog("logs/go10000.xes");
+			//XLog log = XLogReader.openLog("logs/hospital_log.xes");
+			XLogManager logManager = new XLogManager(log);
 
-			//SignatureDiscoveryInput input = new SignatureDiscoveryInput();
-			//DiscoverSignatures discoverSignatures = new DiscoverSignatures(log,log, 0.5, 3, input, true);
+/*
+			for (XTrace trace : log) {
 
-			//SequentalPattern sequentalPattern = new SequentalPattern(log);
-			//IndividualActivityEncoder encoder = new IndividualActivityEncoder(log, EncodingType.FREQUENCY);
-			/*SetBasedEncoder encoder = new SetBasedEncoder(log, EncodingType.BINARY);
-			encoder.encodeTraces();
+				trace.getAttributes().put("Label", new XAttributeLiteralImpl("Label", "value"));
+				System.out.println(trace.getAttributes());
+			}
+
+			SignatureDiscoveryInput input = new SignatureDiscoveryInput();
+			input.removeAllFeatures();
+			input.addFeature("Tandem Repeat");
+			input.addFeature("Maximal Repeat");
+			input.addFeature("Tandem Repeat Alphabet");
+			input.addFeature("Maximal Repeat Alphabet");
+			DiscoverSignatures discoverSignatures = new DiscoverSignatures(log,log, 0.5, 3, input, true);
+*/
+
+			SequentalPattern sequentalPattern = new SequentalPattern(log);
+			IndividualActivityEncoder encoder = new IndividualActivityEncoder(log, EncodingType.FREQUENCY);
+			//SetBasedEncoder encoder = new SetBasedEncoder(log, EncodingType.FREQUENCY);
+			encoder.encodeTraces(log);
 			Instances instances = encoder.getEncodedTraces();
 			writeInstancesToFile(instances);
 
 			DecisionTreeJ48 j48 = new DecisionTreeJ48(instances);
-			j48.classify();*/
+			j48.classify();
 
 		} catch (Exception e) {
 			e.printStackTrace();
